@@ -54,6 +54,31 @@ public class HomePageObject {
     @FindBy(id = "notes-close-button")
     private WebElement noteCloseBtn;
 
+    @FindBy(id = "add-credential-button")
+    private WebElement addCredentialBtn;
+
+    @FindBy(id = "credential-url")
+    private WebElement credentialUrl;
+
+    @FindBy(id = "credential-username")
+    private WebElement credentialUsername;
+
+    @FindBy(id = "credential-password")
+    private WebElement credentialPassword;
+
+
+    @FindBy(id = "saveCredentialBtn")
+    private WebElement credentialSubmitBtn;
+
+    @FindBy(id = "credentialCloseBtn")
+    private WebElement credentialCloseBtn;
+
+    @FindBy(id = "credentialEditBtn")
+    private WebElement credentialEditBtn;
+
+    @FindBy(id = "credentialDeleteBtn")
+    private WebElement credentialDeleteBtn;
+
     private WebDriverWait wait;
 
     private WebDriver webDriver;
@@ -133,5 +158,76 @@ public class HomePageObject {
         noteSaveBtn.click();
         Thread.sleep(2000);
     }
+
+
+    // enter credential -- save credential
+
+    public void enterCredential(String url, String username, String pwd) throws InterruptedException{
+        goToCredentialTab();
+        wait = new WebDriverWait(webDriver,3);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials")));
+
+        addCredentialBtn.click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialModal")));
+
+        credentialUrl.sendKeys(url);
+        credentialUsername.sendKeys(username);
+        credentialPassword.sendKeys(pwd);
+        credentialSubmitBtn.click();
+
+        Thread.sleep(2000);
+    }
+
+    //delete credential
+    public void deleteCredential(){
+        goToCredentialTab();
+        wait = new WebDriverWait(webDriver, 3);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialDeleteBtn")));
+        credentialDeleteBtn.click();
+    }
+    // editCredential
+    public void editCredential(String url, String username, String pwd) throws InterruptedException{
+        goToCredentialTab();
+        wait = new WebDriverWait(webDriver, 2);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialEditBtn")));
+
+        credentialEditBtn.click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialModal")));
+        credentialUrl.clear();
+        credentialUrl.sendKeys(url);
+        credentialUsername.clear();
+        credentialUsername.sendKeys(username);
+        credentialPassword.clear();
+        credentialPassword.sendKeys(pwd);
+
+        credentialSubmitBtn.click();
+        Thread.sleep(2000);
+
+    }
+
+    public String getCredentialUrlString() throws InterruptedException{
+        Thread.sleep(1000);
+        return webDriver.findElement(By.id("credentialUrlText")).getText();
+    }
+
+    public String getCredentialUsernameString(){
+        return webDriver.findElement(By.id("credentialUsernameText")).getText();
+    }
+
+    public String getCredentialPwdString() throws InterruptedException{
+        goToCredentialTab();
+        wait = new WebDriverWait(webDriver, 1);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialEditBtn")));
+
+        credentialEditBtn.click();
+        Thread.sleep(1000);
+
+        String storedPwd = credentialPassword.getAttribute("value");
+                //webDriver.findElement(By.id("credentialPassword")).getText();
+        credentialCloseBtn.click();
+        Thread.sleep(1000);
+        return storedPwd;
+    }
+
 
 }
