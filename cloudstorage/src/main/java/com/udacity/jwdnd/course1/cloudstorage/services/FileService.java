@@ -100,11 +100,11 @@ public class FileService {
         }
     }
 
-    public List<FileResponse> getFilesByUserId() throws DataNotAvailableException{
+    public List<FileResponse> getFilesByUserId(int userId) throws DataNotAvailableException{
         List<FileResponse> fileList;
 
         try{
-            int userId = userService.getUserByUserName(authService.getLoggedInUser().getName()).getUserid();
+            //int userId = userService.getUserByUserName(authService.getLoggedInUser().getName()).getUserid();
             fileList = fileMapper.getFilesByUserId(userId).stream().map(FileResponse::new).collect(Collectors.toList());
             return  fileList;
         } catch (Exception e){

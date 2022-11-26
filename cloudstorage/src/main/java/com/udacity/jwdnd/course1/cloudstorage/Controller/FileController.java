@@ -1,11 +1,11 @@
 package com.udacity.jwdnd.course1.cloudstorage.Controller;
 
 
+import com.udacity.jwdnd.course1.cloudstorage.Model.Credential;
 import com.udacity.jwdnd.course1.cloudstorage.Model.File;
 import com.udacity.jwdnd.course1.cloudstorage.Model.FileResponse;
-import com.udacity.jwdnd.course1.cloudstorage.services.AuthenticationService;
-import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
-import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
+import com.udacity.jwdnd.course1.cloudstorage.Model.Notes;
+import com.udacity.jwdnd.course1.cloudstorage.services.*;
 import org.apache.tomcat.util.modeler.modules.ModelerSource;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -16,19 +16,26 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/files")
 public class FileController {
 
 
+    private NotesService notesService;
+
     private FileService fileService;
     private AuthenticationService authenticationService;
     private UserService userService;
 
+    private CredentialService credentialsService;
 
-    public FileController(FileService fileService, AuthenticationService authenticationService, UserService userService){
+
+    public FileController(FileService fileService, NotesService notesService,CredentialService credentialsService, AuthenticationService authenticationService, UserService userService){
+        this.notesService = notesService;
         this.fileService = fileService;
+        this.credentialsService = credentialsService;
         this.authenticationService = authenticationService;
         this.userService = userService;
     }
@@ -38,10 +45,17 @@ public class FileController {
     @PostMapping
     public String uploadFile(Model model, @RequestParam("fileUpload")MultipartFile file){
         try{
+            int userid = userService.getUserByUserName(authenticationService.getLoggedInUser().getName()).getUserid();
             int fileId = fileService.uploadFile(file);
             if(Integer.valueOf(fileId) != null){
-                model.addAttribute("errorMessage", null);
-                return "redirect:/home";
+                model.addAttribute("tab", "nav-files-tab");
+                model.addAttribute("success", true);
+                model.addAttribute("files", fileService.getFilesByUserId(userid));
+                model.addAttribute("notes", notesService.selectNotes(userid));
+                model.addAttribute("credentials", credentialsService.getAllCredentials(userid));
+                model.addAttribute("note", new Notes());
+                 model.addAttribute("credential", new Credential());
+                return "home";
             }else{
                 throw new Exception("File Could Not Be Uploaded");
             }
@@ -53,19 +67,7 @@ public class FileController {
             return "result";
         }
     }
-    //view file
 
-    @GetMapping
-    public String viewFile(Model model, @RequestParam int fileId){
-        try{
-           FileResponse fileResponse =  fileService.getFileByFileId(fileId);
-           model.addAttribute("message", fileResponse);
-           return "home";
-        }catch (Exception e){
-            model.addAttribute("errorMessage", "an error has occurred while getting the file");
-            return "home";
-        }
-    }
 
     // update file
 
@@ -73,9 +75,16 @@ public class FileController {
     @RequestMapping(value = "/delete", method = {RequestMethod.GET,RequestMethod.DELETE})
     public String deleteFile(Model model, @RequestParam int fileId){
         try{
+            int userid = userService.getUserByUserName(authenticationService.getLoggedInUser().getName()).getUserid();
             fileService.deleteFileByFileId(fileId);
-            model.addAttribute("errorMessage", null);
-            return "redirect:/home";
+            model.addAttribute("tab", "nav-files-tab");
+            model.addAttribute("success", true);
+            model.addAttribute("files", fileService.getFilesByUserId(userid));
+            model.addAttribute("notes", notesService.selectNotes(userid));
+            model.addAttribute("credentials", credentialsService.getAllCredentials(userid));
+            model.addAttribute("note", new Notes());
+            model.addAttribute("credential", new Credential());
+            return "home";
         }catch (Exception e){
             model.addAttribute("errorMessage", "an error occurred when deleting the file");
             return "result";

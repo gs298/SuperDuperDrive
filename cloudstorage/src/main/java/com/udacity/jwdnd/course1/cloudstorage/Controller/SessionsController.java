@@ -40,7 +40,6 @@ public class SessionsController {
         if(validator.hasErrors()){
             String pwdError = "Password Format is not correct";
             model.addAttribute("errorMessage",validator.getFieldError().getArguments()[0].toString().contains("password")? pwdError:"password cannot be blank");
-            model.addAttribute("message", null);
             return "signup";
         }
 
@@ -49,10 +48,10 @@ public class SessionsController {
         }
         catch (SignUpException e){
             model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("message", null);
+            model.addAttribute("success", null);
             return "signup";
         }
-        model.addAttribute("message","You successfully signed up!");
+        model.addAttribute("success","You successfully signed up!");
         return "redirect:/login";
 
     }

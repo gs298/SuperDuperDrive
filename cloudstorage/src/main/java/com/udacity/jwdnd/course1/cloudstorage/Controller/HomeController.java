@@ -39,11 +39,12 @@ public class HomeController {
         }
 
         try {
-            model.addAttribute("files", fileService.getFilesByUserId());
+            model.addAttribute("files", fileService.getFilesByUserId(userId));
             model.addAttribute("notes", notesService.selectNotes(userId));
             model.addAttribute("credentials", credentialService.getAllCredentials(userId));
             model.addAttribute("note", new Notes());
             model.addAttribute("credential", new Credential());
+           // model.addAttribute("success","You have logged in");
             return "home";
         }
         catch (DataNotAvailableException e){
